@@ -36,7 +36,7 @@ const Transactions = () => {
 
   const openAddModal = () => {
     setFormData({
-      product: products[0]?._id || '',
+      product: '',
       type: 'stock-in',
       quantity: '1',
       note: ''

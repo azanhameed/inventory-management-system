@@ -8,12 +8,14 @@ import {
   editCategory, 
   removeCategory 
 } from '../store/slices/categorySlice';
+import { fetchProducts } from '../store/slices/productSlice';
 
 const Categories = () => {
   const dispatch = useDispatch();
 
   // Redux state
   const { items: categories, loading, error } = useSelector(state => state.categories);
+  const { items: products } = useSelector(state => state.products);
 
   // Local state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -24,6 +26,7 @@ const Categories = () => {
 
   useEffect(() => {
     dispatch(fetchCategories());
+    dispatch(fetchProducts());
   }, [dispatch]);
 
   // Handle toast notifications for Redux errors
@@ -133,32 +136,45 @@ const Categories = () => {
               <tr>
                 <th>Category Name</th>
                 <th>Description</th>
+                <th style={{ textAlign: 'center', width: '150px' }}>Products Count</th>
                 <th style={{ textAlign: 'center', width: '150px' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {categories.length > 0 ? (
-                categories.map((cat) => (
-                  <tr key={cat._id}>
-                    <td style={{ fontWeight: '600', width: '250px' }}>{cat.name}</td>
-                    <td style={{ color: 'var(--text-secondary)' }}>
-                      {cat.description || <span style={{ color: 'var(--text-muted)' }}>No description provided</span>}
-                    </td>
-                    <td>
-                      <div style={styles.actionsCell}>
-                        <button className="btn-icon" onClick={() => openEditModal(cat)} title="Edit Category">
-                          <FiEdit2 size={16} />
-                        </button>
-                        <button className="btn-icon btn-icon-danger" onClick={() => handleDeleteCategory(cat._id)} title="Delete Category">
-                          <FiTrash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                categories.map((cat) => {
+                  const productCount = products.filter(p => {
+                    const pCatId = p.category?._id || p.category;
+                    return pCatId === cat._id;
+                  }).length;
+
+                  return (
+                    <tr key={cat._id}>
+                      <td style={{ fontWeight: '600', width: '250px' }}>{cat.name}</td>
+                      <td style={{ color: 'var(--text-secondary)' }}>
+                        {cat.description || <span style={{ color: 'var(--text-muted)' }}>No description provided</span>}
+                      </td>
+                      <td style={{ textAlign: 'center', fontWeight: '600' }}>
+                        <span className="badge badge-info" style={{ minWidth: '35px', justifyContent: 'center' }}>
+                          {productCount}
+                        </span>
+                      </td>
+                      <td>
+                        <div style={styles.actionsCell}>
+                          <button className="btn-icon" onClick={() => openEditModal(cat)} title="Edit Category">
+                            <FiEdit2 size={16} />
+                          </button>
+                          <button className="btn-icon btn-icon-danger" onClick={() => handleDeleteCategory(cat._id)} title="Delete Category">
+                            <FiTrash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
-                  <td colSpan="3" style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '2rem' }}>
+                  <td colSpan="4" style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '2rem' }}>
                     No categories registered yet. Click "Add Category" to get started.
                   </td>
                 </tr>

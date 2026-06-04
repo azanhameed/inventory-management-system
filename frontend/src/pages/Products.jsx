@@ -8,7 +8,7 @@ import {
   FiTrash2, 
   FiX, 
   FiCheck, 
-  FiAlertTriangle 
+  FiEye 
 } from 'react-icons/fi';
 import { 
   fetchProducts, 
@@ -47,6 +47,10 @@ const Products = () => {
   });
   const [formErrors, setFormErrors] = useState({});
 
+  // View Details Modal state
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [viewedProduct, setViewedProduct] = useState(null);
+
   // Inline quantity edit state
   const [inlineEditingId, setInlineEditingId] = useState(null);
   const [inlineQuantityVal, setInlineQuantityVal] = useState(0);
@@ -66,8 +70,8 @@ const Products = () => {
 
   // Search filter
   const filteredProducts = products.filter(p => 
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.SKU.toLowerCase().includes(searchTerm.toLowerCase())
+    (p.name && p.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (p.SKU && p.SKU.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   // Open modal for adding
@@ -305,6 +309,9 @@ const Products = () => {
                       </td>
                       <td>
                         <div style={styles.actionsCell}>
+                          <button className="btn-icon" onClick={() => { setViewedProduct(p); setIsDetailsModalOpen(true); }} title="View Product Details">
+                            <FiEye size={16} />
+                          </button>
                           <button className="btn-icon" onClick={() => openEditModal(p)} title="Edit Product">
                             <FiEdit2 size={16} />
                           </button>
@@ -325,6 +332,75 @@ const Products = () => {
               )}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* View Details Modal */}
+      {isDetailsModalOpen && viewedProduct && (
+        <div className="modal-overlay">
+          <div className="modal-content" style={{ maxWidth: '500px' }}>
+            <header className="modal-header">
+              <h3 className="modal-title">Product Details</h3>
+              <button className="modal-close" onClick={() => setIsDetailsModalOpen(false)}>
+                <FiX />
+              </button>
+            </header>
+            <div className="modal-body">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                <div style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Product Name</div>
+                  <div style={{ fontSize: '1.1rem', fontWeight: '600' }}>{viewedProduct.name}</div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
+                  <div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>SKU Code</div>
+                    <div style={{ fontWeight: '500' }}>{viewedProduct.SKU}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Price</div>
+                    <div style={{ fontWeight: '500' }}>${viewedProduct.price?.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
+                  <div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Category</div>
+                    <div>{viewedProduct.category?.name || 'Uncategorized'}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Supplier</div>
+                    <div>{viewedProduct.supplier?.name || 'No Supplier'}</div>
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
+                  <div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Current Stock</div>
+                    <div style={{ fontWeight: '600' }}>{viewedProduct.quantity} units</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Low Stock Threshold</div>
+                    <div>{viewedProduct.lowStockThreshold} units</div>
+                  </div>
+                </div>
+                <div style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Description</div>
+                  <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', whiteSpace: 'pre-line' }}>
+                    {viewedProduct.description || 'No description available.'}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Date Added</div>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    {new Date(viewedProduct.createdAt).toLocaleString()}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <footer className="modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={() => setIsDetailsModalOpen(false)}>
+                Close
+              </button>
+            </footer>
+          </div>
         </div>
       )}
 

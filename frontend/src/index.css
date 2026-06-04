@@ -305,9 +305,11 @@ button {
 
 /* Row-specific styles for Transactions */
 .tr-stock-in {
+  background-color: rgba(16, 185, 129, 0.05) !important;
   border-left: 4px solid var(--success-color);
 }
 .tr-stock-out {
+  background-color: rgba(239, 68, 68, 0.05) !important;
   border-left: 4px solid var(--danger-color);
 }
 

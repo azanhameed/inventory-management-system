@@ -151,24 +151,35 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Low Stock Alerts List */}
+        {/* Low Stock Alerts Table */}
         <div className="dashboard-card">
           <h3 className="dashboard-card-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <FiAlertTriangle color="var(--warning-color)" /> Low Stock Alerts
           </h3>
-          <div style={styles.alertsContainer}>
+          <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
             {lowStockItemsList.length > 0 ? (
-              lowStockItemsList.map(item => (
-                <div key={item._id} style={styles.alertRow}>
-                  <div>
-                    <div style={styles.alertName}>{item.name}</div>
-                    <div style={styles.alertSku}>SKU: {item.SKU}</div>
-                  </div>
-                  <span className="badge badge-danger">
-                    {item.quantity} left
-                  </span>
-                </div>
-              ))
+              <table className="modern-table" style={{ fontSize: '0.85rem' }}>
+                <thead>
+                  <tr>
+                    <th style={{ padding: '0.5rem 1rem' }}>Product</th>
+                    <th style={{ padding: '0.5rem 1rem' }}>SKU</th>
+                    <th style={{ padding: '0.5rem 1rem' }}>Stock</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {lowStockItemsList.map(item => (
+                    <tr key={item._id}>
+                      <td style={{ padding: '0.5rem 1rem', fontWeight: '600' }}>{item.name}</td>
+                      <td style={{ padding: '0.5rem 1rem', color: 'var(--text-secondary)' }}>{item.SKU}</td>
+                      <td style={{ padding: '0.5rem 1rem' }}>
+                        <span className="badge badge-danger" style={{ padding: '0.15rem 0.5rem', fontSize: '0.7rem' }}>
+                          {item.quantity} left
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             ) : (
               <div style={styles.noData}>No low stock products. All items fully stocked!</div>
             )}
