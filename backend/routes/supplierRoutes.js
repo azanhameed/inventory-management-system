@@ -7,12 +7,14 @@ const {
   deleteSupplier
 } = require('../controllers/supplierController');
 
+const { adminOnly } = require('../middleware/auth');
+
 router.route('/')
   .get(getAllSuppliers)
   .post(createSupplier);
 
 router.route('/:id')
   .put(updateSupplier)
-  .delete(deleteSupplier);
+  .delete(adminOnly, deleteSupplier);
 
 module.exports = router;

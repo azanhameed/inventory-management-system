@@ -15,7 +15,8 @@ import {
   addProduct, 
   editProduct, 
   removeProduct, 
-  patchProductQuantity 
+  patchProductQuantity,
+  uploadProductImage
 } from '../store/slices/productSlice';
 import { fetchCategories } from '../store/slices/categorySlice';
 import { fetchSuppliers } from '../store/slices/supplierSlice';
@@ -27,9 +28,11 @@ const Products = () => {
   const { items: products, loading: productsLoading, error: productsError } = useSelector(state => state.products);
   const { items: categories, loading: categoriesLoading } = useSelector(state => state.categories);
   const { items: suppliers, loading: suppliersLoading } = useSelector(state => state.suppliers);
+  const { user } = useSelector(state => state.auth);
 
   // Local state
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedFile, setSelectedFile] = useState(null);
   
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -43,7 +46,8 @@ const Products = () => {
     price: '',
     quantity: '0',
     lowStockThreshold: '10',
-    description: ''
+    description: '',
+    image: ''
   });
   const [formErrors, setFormErrors] = useState({});
 
@@ -77,6 +81,7 @@ const Products = () => {
   // Open modal for adding
   const openAddModal = () => {
     setModalMode('add');
+    setSelectedFile(null);
     setFormData({
       name: '',
       SKU: '',
@@ -85,7 +90,8 @@ const Products = () => {
       price: '',
       quantity: '0',
       lowStockThreshold: '10',
-      description: ''
+      description: '',
+      image: ''
     });
     setFormErrors({});
     setIsModalOpen(true);
@@ -94,6 +100,7 @@ const Products = () => {
   // Open modal for editing
   const openEditModal = (product) => {
     setModalMode('edit');
+    setSelectedFile(null);
     setEditingId(product._id);
     setFormData({
       name: product.name,
@@ -103,7 +110,8 @@ const Products = () => {
       price: product.price.toString(),
       quantity: product.quantity.toString(),
       lowStockThreshold: product.lowStockThreshold.toString(),
-      description: product.description || ''
+      description: product.description || '',
+      image: product.image || ''
     });
     setFormErrors({});
     setIsModalOpen(true);
@@ -159,9 +167,22 @@ const Products = () => {
     if (modalMode === 'add') {
       dispatch(addProduct(parsedData))
         .unwrap()
-        .then(() => {
-          toast.success('Product created successfully');
-          setIsModalOpen(false);
+        .then((newProduct) => {
+          if (selectedFile) {
+            dispatch(uploadProductImage({ id: newProduct._id, file: selectedFile }))
+              .unwrap()
+              .then(() => {
+                toast.success('Product created and image uploaded successfully');
+                setIsModalOpen(false);
+              })
+              .catch(err => {
+                toast.warning('Product created, but image upload failed: ' + err);
+                setIsModalOpen(false);
+              });
+          } else {
+            toast.success('Product created successfully');
+            setIsModalOpen(false);
+          }
         })
         .catch(err => {
           toast.error(err || 'Failed to create product');
@@ -169,9 +190,22 @@ const Products = () => {
     } else {
       dispatch(editProduct({ id: editingId, productData: parsedData }))
         .unwrap()
-        .then(() => {
-          toast.success('Product updated successfully');
-          setIsModalOpen(false);
+        .then((updatedProduct) => {
+          if (selectedFile) {
+            dispatch(uploadProductImage({ id: editingId, file: selectedFile }))
+              .unwrap()
+              .then(() => {
+                toast.success('Product and image updated successfully');
+                setIsModalOpen(false);
+              })
+              .catch(err => {
+                toast.warning('Product updated, but image upload failed: ' + err);
+                setIsModalOpen(false);
+              });
+          } else {
+            toast.success('Product updated successfully');
+            setIsModalOpen(false);
+          }
         })
         .catch(err => {
           toast.error(err || 'Failed to update product');
@@ -223,9 +257,11 @@ const Products = () => {
       <header style={styles.header}>
         <div style={styles.headerTop}>
           <h2 style={styles.title}>Products Directory</h2>
-          <button className="btn btn-primary" onClick={openAddModal}>
-            <FiPlus size={16} /> Add Product
-          </button>
+          {user?.role === 'admin' && (
+            <button className="btn btn-primary" onClick={openAddModal}>
+              <FiPlus size={16} /> Add Product
+            </button>
+          )}
         </div>
         <p style={styles.subtitle}>Manage, filter, and track items in your inventory catalog.</p>
       </header>
@@ -253,6 +289,7 @@ const Products = () => {
           <table className="modern-table">
             <thead>
               <tr>
+                <th>Image</th>
                 <th>Product Name</th>
                 <th>SKU</th>
                 <th>Category</th>
@@ -271,6 +308,23 @@ const Products = () => {
 
                   return (
                     <tr key={p._id}>
+                      <td>
+                        {p.image ? (
+                          <img 
+                            src={`http://localhost:5000${p.image}`} 
+                            alt={p.name} 
+                            style={{ width: '40px', height: '40px', borderRadius: '6px', objectFit: 'cover', border: '1px solid var(--border-color)' }}
+                            onError={(e) => {
+                              e.target.onerror = null; 
+                              e.target.src = 'https://placehold.co/40?text=No+Img';
+                            }}
+                          />
+                        ) : (
+                          <div style={{ width: '40px', height: '40px', borderRadius: '6px', backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '0.75rem' }}>
+                            No Img
+                          </div>
+                        )}
+                      </td>
                       <td style={{ fontWeight: '600' }}>{p.name}</td>
                       <td style={{ color: 'var(--text-muted)' }}>{p.SKU}</td>
                       <td>{p.category?.name || 'Uncategorized'}</td>
@@ -279,7 +333,7 @@ const Products = () => {
                         ${p.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                       </td>
                       <td>
-                        {isEditingThisTx ? (
+                        {isEditingThisTx && user?.role === 'admin' ? (
                           <div style={styles.inlineEditWrapper}>
                             <input 
                               type="number" 
@@ -296,9 +350,15 @@ const Products = () => {
                             </button>
                           </div>
                         ) : (
-                          <div style={styles.quantityDisplay} title="Double click to quick edit" onDoubleClick={() => startInlineEdit(p)}>
+                          <div 
+                            style={styles.quantityDisplay} 
+                            title={user?.role === 'admin' ? "Double click to quick edit" : ""} 
+                            onDoubleClick={() => user?.role === 'admin' && startInlineEdit(p)}
+                          >
                             <span style={{ fontWeight: '600' }}>{p.quantity}</span>
-                            <button style={styles.quickEditBtn} onClick={() => startInlineEdit(p)}>edit</button>
+                            {user?.role === 'admin' && (
+                              <button style={styles.quickEditBtn} onClick={() => startInlineEdit(p)}>edit</button>
+                            )}
                           </div>
                         )}
                       </td>
@@ -312,12 +372,16 @@ const Products = () => {
                           <button className="btn-icon" onClick={() => { setViewedProduct(p); setIsDetailsModalOpen(true); }} title="View Product Details">
                             <FiEye size={16} />
                           </button>
-                          <button className="btn-icon" onClick={() => openEditModal(p)} title="Edit Product">
-                            <FiEdit2 size={16} />
-                          </button>
-                          <button className="btn-icon btn-icon-danger" onClick={() => handleDeleteProduct(p._id)} title="Delete Product">
-                            <FiTrash2 size={16} />
-                          </button>
+                          {user?.role === 'admin' && (
+                            <>
+                              <button className="btn-icon" onClick={() => openEditModal(p)} title="Edit Product">
+                                <FiEdit2 size={16} />
+                              </button>
+                              <button className="btn-icon btn-icon-danger" onClick={() => handleDeleteProduct(p._id)} title="Delete Product">
+                                <FiTrash2 size={16} />
+                              </button>
+                            </>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -325,7 +389,7 @@ const Products = () => {
                 })
               ) : (
                 <tr>
-                  <td colSpan="8" style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '2rem' }}>
+                  <td colSpan="9" style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '2rem' }}>
                     No products found matching the criteria.
                   </td>
                 </tr>
@@ -347,6 +411,18 @@ const Products = () => {
             </header>
             <div className="modal-body">
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                {viewedProduct.image && (
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
+                    <img 
+                      src={`http://localhost:5000${viewedProduct.image}`} 
+                      alt={viewedProduct.name} 
+                      style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '8px', objectFit: 'contain', border: '1px solid var(--border-color)' }}
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
                 <div style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Product Name</div>
                   <div style={{ fontSize: '1.1rem', fontWeight: '600' }}>{viewedProduct.name}</div>
@@ -516,6 +592,28 @@ const Products = () => {
                     />
                     {formErrors.lowStockThreshold && <span className="error-text">{formErrors.lowStockThreshold}</span>}
                   </div>
+                </div>
+
+                <div className="form-group form-group-full">
+                  <label className="form-label">Product Image</label>
+                  <input 
+                    type="file" 
+                    accept="image/*"
+                    className="form-input" 
+                    onChange={(e) => setSelectedFile(e.target.files[0])}
+                    style={{ padding: '0.5rem' }}
+                  />
+                  {modalMode === 'edit' && formData.image && (
+                    <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <img 
+                        src={`http://localhost:5000${formData.image}`} 
+                        alt="Current product" 
+                        style={{ width: '40px', height: '40px', borderRadius: '4px', objectFit: 'cover', border: '1px solid var(--border-color)' }}
+                        onError={(e) => { e.target.style.display = 'none'; }}
+                      />
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Current Image</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="form-group form-group-full">

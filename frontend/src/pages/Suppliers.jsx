@@ -14,6 +14,7 @@ const Suppliers = () => {
 
   // Redux state
   const { items: suppliers, loading, error } = useSelector(state => state.suppliers);
+  const { user } = useSelector(state => state.auth);
 
   // Local state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -166,9 +167,11 @@ const Suppliers = () => {
                         <button className="btn-icon" onClick={() => openEditModal(sup)} title="Edit Supplier">
                           <FiEdit2 size={16} />
                         </button>
-                        <button className="btn-icon btn-icon-danger" onClick={() => handleDeleteSupplier(sup._id)} title="Delete Supplier">
-                          <FiTrash2 size={16} />
-                        </button>
+                        {user?.role === 'admin' && (
+                          <button className="btn-icon btn-icon-danger" onClick={() => handleDeleteSupplier(sup._id)} title="Delete Supplier">
+                            <FiTrash2 size={16} />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

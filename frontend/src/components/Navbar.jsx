@@ -1,10 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { FiBell, FiLayers, FiAlertTriangle } from 'react-icons/fi';
-import { Link } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { FiBell, FiLayers, FiAlertTriangle, FiLogOut } from 'react-icons/fi';
+import { Link, useNavigate } from 'react-router-dom';
+import { logoutUser } from '../store/slices/authSlice';
 
 const Navbar = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { items: products } = useSelector(state => state.products);
+  const { user } = useSelector(state => state.auth);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -21,6 +25,11 @@ const Navbar = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const handleLogout = () => {
+    dispatch(logoutUser());
+    navigate('/login');
+  };
 
   return (
     <header style={styles.navbar}>
@@ -74,7 +83,19 @@ const Navbar = () => {
         <div style={styles.divider}></div>
         
         {/* Simple User Display */}
-        <span style={styles.adminText}>Admin</span>
+        {user && (
+          <div style={styles.userContainer}>
+            <div style={styles.userInfo}>
+              <span style={styles.usernameText}>{user.username}</span>
+              <span className={`badge ${user.role === 'admin' ? 'badge-danger' : 'badge-info'}`} style={styles.roleBadge}>
+                {user.role}
+              </span>
+            </div>
+            <button style={styles.logoutButton} onClick={handleLogout} title="Log Out">
+              <FiLogOut size={16} />
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );
@@ -148,6 +169,41 @@ const styles = {
     fontSize: '0.9rem',
     fontWeight: '600',
     color: 'var(--text-primary)',
+  },
+  userContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
+  },
+  userInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-end',
+    gap: '2px',
+  },
+  usernameText: {
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    color: 'var(--text-primary)',
+  },
+  roleBadge: {
+    fontSize: '0.7rem',
+    fontWeight: '700',
+    padding: '2px 6px',
+    borderRadius: '4px',
+    textTransform: 'uppercase',
+  },
+  logoutButton: {
+    color: 'var(--text-secondary)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '6px',
+    borderRadius: '6px',
+    border: '1px solid var(--border-color)',
+    backgroundColor: 'var(--bg-tertiary)',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
   },
   dropdown: {
     position: 'absolute',

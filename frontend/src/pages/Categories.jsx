@@ -16,6 +16,7 @@ const Categories = () => {
   // Redux state
   const { items: categories, loading, error } = useSelector(state => state.categories);
   const { items: products } = useSelector(state => state.products);
+  const { user } = useSelector(state => state.auth);
 
   // Local state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -164,9 +165,11 @@ const Categories = () => {
                           <button className="btn-icon" onClick={() => openEditModal(cat)} title="Edit Category">
                             <FiEdit2 size={16} />
                           </button>
-                          <button className="btn-icon btn-icon-danger" onClick={() => handleDeleteCategory(cat._id)} title="Delete Category">
-                            <FiTrash2 size={16} />
-                          </button>
+                          {user?.role === 'admin' && (
+                            <button className="btn-icon btn-icon-danger" onClick={() => handleDeleteCategory(cat._id)} title="Delete Category">
+                              <FiTrash2 size={16} />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>

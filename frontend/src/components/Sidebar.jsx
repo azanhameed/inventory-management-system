@@ -1,15 +1,19 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { 
   FiGrid, 
   FiBox, 
   FiFolder, 
   FiTruck, 
   FiRepeat, 
-  FiLayers 
+  FiLayers,
+  FiShield
 } from 'react-icons/fi';
 
 const Sidebar = () => {
+  const { user } = useSelector(state => state.auth);
+
   const menuItems = [
     { path: '/', label: 'Dashboard', icon: <FiGrid size={18} /> },
     { path: '/products', label: 'Products', icon: <FiBox size={18} /> },
@@ -17,6 +21,10 @@ const Sidebar = () => {
     { path: '/suppliers', label: 'Suppliers', icon: <FiTruck size={18} /> },
     { path: '/transactions', label: 'Transactions', icon: <FiRepeat size={18} /> },
   ];
+
+  if (user && user.role === 'admin') {
+    menuItems.push({ path: '/admin', label: 'Admin Panel', icon: <FiShield size={18} /> });
+  }
 
   return (
     <aside style={styles.sidebar}>

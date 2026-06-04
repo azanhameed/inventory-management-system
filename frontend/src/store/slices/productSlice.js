@@ -69,6 +69,17 @@ export const removeProduct = createAsyncThunk(
   }
 );
 
+export const uploadProductImage = createAsyncThunk(
+  'products/uploadProductImage',
+  async ({ id, file }, { rejectWithValue }) => {
+    try {
+      return await productAPI.uploadProductImage(id, file);
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to upload product image');
+    }
+  }
+);
+
 const initialState = {
   items: [],
   selectedProduct: null,
@@ -176,6 +187,25 @@ const productSlice = createSlice({
         state.items = state.items.filter(item => item._id !== action.payload);
       })
       .addCase(removeProduct.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // Upload Product Image
+      .addCase(uploadProductImage.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(uploadProductImage.fulfilled, (state, action) => {
+        state.loading = false;
+        const index = state.items.findIndex(item => item._id === action.payload._id);
+        if (index !== -1) {
+          state.items[index] = action.payload;
+        }
+        if (state.selectedProduct?._id === action.payload._id) {
+          state.selectedProduct = action.payload;
+        }
+      })
+      .addCase(uploadProductImage.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

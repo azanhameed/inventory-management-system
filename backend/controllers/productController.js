@@ -38,7 +38,7 @@ const getProductById = async (req, res) => {
 // @access  Public
 const createProduct = async (req, res) => {
   try {
-    const { name, SKU, category, supplier, price, quantity, lowStockThreshold, description } = req.body;
+    const { name, SKU, category, supplier, price, quantity, lowStockThreshold, description, image } = req.body;
 
     if (!name || !SKU || !category || !supplier || price === undefined) {
       return res.status(400).json({ message: 'Name, SKU, category, supplier, and price are required' });
@@ -58,7 +58,8 @@ const createProduct = async (req, res) => {
       price,
       quantity: quantity !== undefined ? quantity : 0,
       lowStockThreshold: lowStockThreshold !== undefined ? lowStockThreshold : 10,
-      description
+      description,
+      image: image || ''
     });
 
     const populatedProduct = await Product.findById(product._id)
@@ -76,7 +77,7 @@ const createProduct = async (req, res) => {
 // @access  Public
 const updateProduct = async (req, res) => {
   try {
-    const { name, SKU, category, supplier, price, quantity, lowStockThreshold, description } = req.body;
+    const { name, SKU, category, supplier, price, quantity, lowStockThreshold, description, image } = req.body;
     const product = await Product.findById(req.params.id);
 
     if (!product) {
@@ -99,6 +100,7 @@ const updateProduct = async (req, res) => {
     if (quantity !== undefined) product.quantity = quantity;
     if (lowStockThreshold !== undefined) product.lowStockThreshold = lowStockThreshold;
     if (description !== undefined) product.description = description;
+    if (image !== undefined) product.image = image;
 
     const updatedProduct = await product.save();
     
@@ -157,11 +159,39 @@ const deleteProduct = async (req, res) => {
   }
 };
 
+// @desc    Upload product image
+// @route   POST /api/products/:id/image
+// @access  Private
+const uploadProductImage = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'Please upload an image file' });
+    }
+
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    product.image = `/uploads/${req.file.filename}`;
+    await product.save();
+
+    const populatedProduct = await Product.findById(product._id)
+      .populate('category')
+      .populate('supplier');
+
+    res.status(200).json(populatedProduct);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getAllProducts,
   getProductById,
   createProduct,
   updateProduct,
   updateProductQuantity,
-  deleteProduct
+  deleteProduct,
+  uploadProductImage
 };

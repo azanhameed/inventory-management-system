@@ -6,8 +6,11 @@ const {
   createProduct,
   updateProduct,
   updateProductQuantity,
-  deleteProduct
+  deleteProduct,
+  uploadProductImage
 } = require('../controllers/productController');
+const upload = require('../middleware/upload');
+const { adminOnly } = require('../middleware/auth');
 
 router.route('/')
   .get(getAllProducts)
@@ -16,9 +19,12 @@ router.route('/')
 router.route('/:id')
   .get(getProductById)
   .put(updateProduct)
-  .delete(deleteProduct);
+  .delete(adminOnly, deleteProduct);
 
 router.route('/:id/quantity')
-  .patch(updateProductQuantity);
+  .patch(adminOnly, updateProductQuantity);
+
+router.route('/:id/image')
+  .post(upload.single('image'), uploadProductImage);
 
 module.exports = router;
