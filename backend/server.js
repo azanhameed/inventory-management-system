@@ -17,6 +17,13 @@ app.get('/', (req, res) => {
   res.json({ message: "Inventory API is running" });
 });
 
+// API Routes
+app.use('/api/categories', require('./routes/categoryRoutes'));
+app.use('/api/suppliers', require('./routes/supplierRoutes'));
+app.use('/api/products', require('./routes/productRoutes'));
+app.use('/api/transactions', require('./routes/transactionRoutes'));
+app.use('/api/dashboard', require('./routes/dashboardRoutes'));
+
 // Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
