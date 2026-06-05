@@ -1,103 +1,141 @@
-# Inventory Management System (INVENTO)
+# INVENTO - Inventory Management System
 
-INVENTO is a premium, full-stack Inventory Management System built on the MERN stack. It features real-time stock logging, statistical dashboard analysis, and directory directories for categories, suppliers, and items.
+A full-stack inventory management web application built with React JS, Express JS, and MongoDB Atlas.
 
----
+## Live Demo
+- Frontend: https://inventory-management-system-nu-cyan.vercel.app
+- Backend API: https://inventory-management-system-production-0bfd.up.railway.app
 
-## 🚀 Features
+## Project Description
+INVENTO is a fully functional inventory management system that allows businesses to manage their products, categories, suppliers, and stock transactions. It includes role-based authentication, a dashboard with charts, and full CRUD operations.
 
-- **Dynamic Analytics Dashboard**:
-  - Stat cards summarizing key inventory indicators (Product counts, Category counts, Supplier counts, Low stock alerts, Total inventory valuation).
-  - Elegant graphical representation using Recharts displaying top products by quantity.
-  - Real-time tabular warnings for low stock items.
-  - Quick-view log showing recent inventory transaction activities.
-- **Product Directory**:
-  - Add, edit, view, and delete product profiles.
-  - Advanced search filters mapping names and SKUs.
-  - Inline quick-adjust quantity editor with checkmark confirmation.
-  - Low stock warning flags tied directly to custom thresholds.
-- **Category Classification**:
-  - Complete category setup with descriptions.
-  - Real-time calculation displaying the exact number of active products inside each category.
-- **Supplier Vendor Registry**:
-  - Detailed supplier files recording name, email, phone numbers, and physical addresses.
-- **Transactions Logger**:
-  - Unified chronological ledger capturing all stock movements.
-  - Color-coded transaction rows (Green background for **Stock In**, Red background for **Stock Out**).
-  - Validation to prevent negative stock-out changes.
+## Features
+- JWT-based Authentication (Login & Register)
+- Role-based Access Control (Admin & Staff)
+- Dashboard with stats cards and bar charts
+- Product Management with image upload
+- Category Management
+- Supplier Management
+- Stock Transactions (Stock In / Stock Out)
+- Low stock alerts
+- Search and filter products
+- Responsive UI design
+- Admin Panel for user management
 
----
-
-## 🛠️ Technologies Used
+## Technologies Used
+### Frontend
+- React JS (Vite)
+- Redux Toolkit
+- React Router DOM
+- Axios
+- Recharts
+- React Toastify
+- React Icons
 
 ### Backend
-- **Node.js** & **Express JS** for the REST API server.
-- **MongoDB** & **Mongoose** for the database schema definition.
-- **dotenv** for environment configuration.
-- **cors** for handling cross-origin requests.
+- Node.js
+- Express JS
+- Mongoose
+- JSON Web Token (JWT)
+- Bcrypt JS
+- Multer (image upload)
+- Dotenv
+- CORS
 
-### Frontend
-- **React JS** (scaffolded via **Vite**) for the client application.
-- **Redux Toolkit** & **React Redux** for global state management.
-- **React Router DOM** for navigation layout and URL routing.
-- **Axios** for HTTP API communications.
-- **Recharts** for rendering high-fidelity dashboard charts.
-- **React Icons** for modern SVG interface iconography.
-- **React Toastify** for elegant status/error toast notifications.
-- **Vanilla CSS** with CSS Custom Properties for responsive layouts.
+### Database
+- MongoDB Atlas
 
----
+### Deployment
+- Frontend: Vercel
+- Backend: Railway
 
-## ⚙️ Environment Variables (Backend)
+## Folder Structure
+inventory-management-system/
+├── frontend/         # React JS frontend
+│   ├── src/
+│   │   ├── api/      # Axios instance and API functions
+│   │   ├── components/   # Navbar, Sidebar, Layout
+│   │   ├── pages/    # Dashboard, Products, Categories, Suppliers, Transactions
+│   │   ├── store/    # Redux store and slices
+│   │   └── App.jsx
+├── backend/          # Express JS backend
+│   ├── config/       # Database connection
+│   ├── controllers/  # Route controllers
+│   ├── middleware/   # Auth and upload middleware
+│   ├── models/       # Mongoose models
+│   ├── routes/       # API routes
+│   └── server.js
 
-Create a `.env` file inside the `backend/` folder. Refer to the `.env.example` for keys:
-
-```env
-PORT=5000
-MONGO_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/inventory_db
-```
-
-- `PORT`: The port number on which the backend server will run (defaults to `5000`).
-- `MONGO_URI`: The MongoDB Atlas connection string or local MongoDB instance URI.
-
----
-
-## 🛠️ Setup and Installation
+## Getting Started
 
 ### Prerequisites
-- [Node.js](https://nodejs.org/) installed (v16+ recommended).
-- [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) cluster configured, or MongoDB running locally.
+- Node.js installed
+- MongoDB Atlas account
+- Git
 
-### Step 1: Clone and Scaffolding
-Ensure you are in the project root directory.
+### Environment Variables
 
-### Step 2: Backend Setup
-1. Navigate into the backend folder:
-   ```bash
-   cd backend
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Set up the `.env` file as described in the **Environment Variables** section.
-4. Run the development server:
-   ```bash
-   npm run dev
-   ```
-   The backend server will run on `http://localhost:5000` and automatically connect to MongoDB.
+Create a `.env` file in the `backend` folder:
+PORT=5000
+MONGO_URI=your_mongodb_atlas_connection_string
+JWT_SECRET=your_jwt_secret
 
-### Step 3: Frontend Setup
-1. Navigate into the frontend folder:
-   ```bash
-   cd ../frontend
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Run the Vite development server:
-   ```bash
-   npm run dev
-   ```
-   The frontend application will boot up at `http://localhost:5173/`. Open this URL in your web browser.
+Create a `.env` file in the `frontend` folder:
+VITE_API_URL=your_backend_url/api
+
+### Installation & Running Locally
+
+#### Backend
+cd backend
+npm install
+npm run dev
+
+#### Frontend
+cd frontend
+npm install
+npm run dev
+
+Frontend runs on: http://localhost:5173
+Backend runs on: http://localhost:5000
+
+## API Endpoints
+
+### Auth
+- POST /api/auth/register
+- POST /api/auth/login
+- GET /api/auth/me
+
+### Products
+- GET /api/products
+- POST /api/products
+- PUT /api/products/:id
+- DELETE /api/products/:id
+- PATCH /api/products/:id/quantity
+- POST /api/products/:id/image
+
+### Categories
+- GET /api/categories
+- POST /api/categories
+- PUT /api/categories/:id
+- DELETE /api/categories/:id
+
+### Suppliers
+- GET /api/suppliers
+- POST /api/suppliers
+- PUT /api/suppliers/:id
+- DELETE /api/suppliers/:id
+
+### Transactions
+- GET /api/transactions
+- POST /api/transactions
+
+### Dashboard
+- GET /api/dashboard
+
+## Git Repository
+https://github.com/azanhameed/inventory-management-system
+
+## Developed By
+Azan Hameed
+Enterprise Application Development - Semester Project
+Sukkur IBA University - 2026
